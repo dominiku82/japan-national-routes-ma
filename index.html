@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#edf4f7">
+<title>一般国道459路線図</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+:root{--g:rgba(255,255,255,.92);--line:rgba(25,43,56,.13);--ink:#17232c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,#map{width:100%;height:100%;margin:0}
+body{overflow:hidden;background:#eaf2f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;color:var(--ink)}
+#map{position:absolute;inset:0}.maplibregl-ctrl-attrib{font-size:8px!important}
+.glass{background:var(--g);border:1px solid var(--line);box-shadow:0 5px 20px #20384922;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+.fab{position:absolute;z-index:12;width:44px;height:44px;border:1px solid var(--line);border-radius:14px;background:var(--g);box-shadow:0 4px 16px #20384922;font-size:19px}
+#searchFab{left:9px;top:max(9px,env(safe-area-inset-top))}#menuFab{right:9px;top:max(9px,env(safe-area-inset-top))}
+#homeFab{left:9px;bottom:max(10px,env(safe-area-inset-bottom))}#labelFab{left:61px;bottom:max(10px,env(safe-area-inset-bottom));font-size:12px;font-weight:900}
+#labelFab.on{background:#175f92;color:#fff}
+#title{position:absolute;z-index:8;left:61px;right:61px;top:max(11px,calc(env(safe-area-inset-top) + 2px));height:39px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;pointer-events:none}
+#title b{color:#0e5b91;margin-left:4px}
+#status{position:absolute;z-index:11;left:50%;top:max(60px,calc(env(safe-area-inset-top) + 56px));transform:translateX(-50%);padding:7px 11px;border-radius:999px;max-width:88vw;font-size:10px;color:#40515e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.25s}
+#progress{position:absolute;z-index:11;left:20%;right:20%;top:max(94px,calc(env(safe-area-inset-top) + 90px));height:3px;background:#ffffffd9;border-radius:99px;overflow:hidden}
+#bar{height:100%;width:6%;background:#17699f;transition:.2s}
+.back{display:none;position:absolute;z-index:20;inset:0;background:#0e182038}.back.open{display:block}
+.sheet{position:absolute;z-index:21;left:7px;right:7px;bottom:-80vh;max-height:74vh;background:#fffffff7;border:1px solid var(--line);border-radius:24px 24px 17px 17px;box-shadow:0 -12px 42px #0e1e2b33;transition:.25s;overflow:hidden}.sheet.open{bottom:max(7px,env(safe-area-inset-bottom))}
+.handle{width:41px;height:4px;background:#c7cfd5;border-radius:99px;margin:8px auto 4px}.head{display:flex;align-items:center;padding:6px 12px 9px}.head h2{font-size:17px;margin:0;flex:1}.close{width:34px;height:34px;border:0;border-radius:50%;background:#edf1f4;font-size:17px}
+.body{padding:0 12px 14px;overflow:auto;max-height:calc(74vh - 52px)}.row{display:flex;gap:7px;position:sticky;top:0;background:#fff;padding:4px 0 9px;z-index:2}
+#routeInput{flex:1;min-width:0;height:44px;border:1px solid #d6dee3;border-radius:13px;background:#f7f9fa;padding:0 13px;font-size:16px}#goBtn{width:72px;border:0;border-radius:13px;background:#175f92;color:#fff;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.grid button{height:38px;border:0;border-radius:9px;background:#f0f4f6;color:#21465f;font-weight:800;font-size:12px}.note{font-size:10px;line-height:1.55;color:#68747e;margin:7px 0 10px}
+.legend{display:grid;gap:10px}.leg{display:flex;align-items:center;gap:9px;font-size:12px}.sw{width:42px;height:5px;border-radius:99px;background:linear-gradient(90deg,#df3f31,#1665b8,#159568,#b636a4,#dd9414)}.sel{background:#ff6a2c}.exp{background:#00a1aa}
+.toggle{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #e1e6ea;padding:10px 1px;font-size:12px}.switch{width:43px;height:25px;border-radius:99px;background:#cbd3d9;position:relative}.switch:after{content:"";position:absolute;width:21px;height:21px;left:2px;top:2px;border-radius:50%;background:#fff;box-shadow:0 1px 5px #0003;transition:.2s}.switch.on{background:#17679d}.switch.on:after{left:20px}
+#card{position:absolute;z-index:13;left:8px;right:8px;bottom:-110px;border-radius:18px;padding:9px 10px;transition:.23s}#card.open{bottom:max(62px,calc(env(safe-area-inset-bottom) + 57px))}
+.cardrow{display:flex;align-items:center;gap:9px}.badge{min-width:48px;height:39px;border-radius:8px;color:#fff;background:#ff6a2c;font-size:16px;font-weight:900;display:grid;place-items:center}.ct{flex:1}.ct strong{font-size:14px}.ct small{display:block;font-size:10px;color:#68747e;margin-top:2px}.clear{border:0;border-radius:11px;height:36px;padding:0 10px;background:#eef2f5;font-size:11px;font-weight:800}
+@media(min-width:720px){.sheet,#card{width:430px;right:auto}.grid{grid-template-columns:repeat(8,1fr)}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="title" class="glass">一般国道 <b>459路線図・関西</b></div>
+<div id="status" class="glass">一般国道データを取得中…</div>
+<div id="progress"><div id="bar"></div></div>
+<button id="searchFab" class="fab">⌕</button><button id="menuFab" class="fab">☰</button>
+<button id="homeFab" class="fab">⌂</button><button id="labelFab" class="fab">番号</button>
+<div id="card" class="glass"><div class="cardrow"><div id="badge" class="badge">1</div><div class="ct"><strong id="rname">国道1号</strong><small>選択路線を強調表示</small></div><button id="clearBtn" class="clear">解除</button></div></div>
+<div id="back" class="back"></div>
+<section id="searchSheet" class="sheet"><div class="handle"></div><div class="head"><h2>国道を探す</h2><button class="close">×</button></div><div class="body"><div class="row"><input id="routeInput" inputmode="numeric" placeholder="国道番号 例：171"><button id="goBtn">表示</button></div><p class="note">初期状態で全路線を表示します。番号を選ぶと、その路線だけ太く強調します。</p><div id="grid" class="grid"></div></div></section>
+<section id="menuSheet" class="sheet"><div class="handle"></div><div class="head"><h2>表示・凡例</h2><button class="close">×</button></div><div class="body"><div class="legend"><div class="leg"><span class="sw"></span>一般国道（路線ごとに色分け）</div><div class="leg"><span class="sw sel"></span>選択中</div><div class="leg"><span class="sw exp"></span>高速系区間</div></div><div class="toggle"><span>路線番号</span><div id="labelSwitch" class="switch"></div></div><div class="toggle"><span>高速系区間</span><div id="expressSwitch" class="switch"></div></div><p class="note">GitHub PagesなどHTTPS上での利用を前提にした版です。圧縮データはWeb Workerで処理します。</p></div></section>
+<script>
+(()=>{'use strict';
+const ROUTES=[...Array.from({length:58},(_,i)=>i+1),...Array.from({length:8},(_,i)=>101+i),...Array.from({length:102},(_,i)=>112+i),...Array.from({length:291},(_,i)=>217+i)];
+const OK=new Set(ROUTES.map(String)), $=id=>document.getElementById(id);
+const DATA='https://pub-34bad449e4ab43ea973ed5d5617595c1.r2.dev/osm_trunk.geojson.gz';
+const MOTOR='https://pub-34bad449e4ab43ea973ed5d5617595c1.r2.dev/osm_motorway.geojson.gz';
+let map,all=null,labels=false,express=false,motorLoaded=false,selected=null;
+function status(t,p=0,hide=false){$('status').textContent=t;$('bar').style.width=Math.max(5,p)+'%';$('status').style.opacity=hide?'0':'1';$('progress').style.opacity=hide?'0':'1'}
+const workerCode=`
+self.onmessage=async e=>{
+ const {url,kind}=e.data;
+ try{
+  postMessage({t:'p',v:12,msg:kind+'をダウンロード中…'});
+  const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw Error('HTTP '+r.status);
+  let text;
+  if('DecompressionStream' in self){
+   text=await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text();
+  }else{
+   importScripts('https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js');
+   text=pako.ungzip(new Uint8Array(await r.arrayBuffer()),{to:'string'});
+  }
+  postMessage({t:'p',v:48,msg:kind+'を展開中…'});
+  const j=JSON.parse(text);
+  const valid=new Set([...Array.from({length:58},(_,i)=>String(i+1)),...Array.from({length:8},(_,i)=>String(101+i)),...Array.from({length:102},(_,i)=>String(112+i)),...Array.from({length:291},(_,i)=>String(217+i))]);
+  const pal=['#df3f31','#1665b8','#159568','#b636a4','#dd9414','#138fa8','#7355bf','#e66b31','#59962c','#d23f70','#158078','#8d641c'];
+  const rfs=v=>[...new Set((String(v||'').match(/\\d{1,3}/g)||[]).map(x=>String(+x)).filter(x=>valid.has(x)))];
+  const slim=(a,t=.0018)=>{if(!a||a.length<3)return a;const o=[a[0]];let q=a[0];for(let i=1;i<a.length-1;i++){const p=a[i],dx=p[0]-q[0],dy=p[1]-q[1];if(dx*dx+dy*dy>t*t){o.push(p);q=p}}o.push(a[a.length-1]);return o};
+  const out=[];let seen=new Set(),i=0;
+  for(const f of j.features||[]){
+   const rr=rfs(f.properties&&f.properties.ref);if(!rr.length)continue;
+   let g=f.geometry;if(!g)continue;
+   if(g.type==='LineString')g={type:'LineString',coordinates:slim(g.coordinates)};
+   else if(g.type==='MultiLineString')g={type:'MultiLineString',coordinates:g.coordinates.map(x=>slim(x))};
+   else continue;
+   rr.forEach(x=>seen.add(x));
+   out.push({type:'Feature',properties:{_s:'|'+rr.join('|')+'|',_l:rr.join('・'),_c:pal[(Number(rr[0])*7+3)%pal.length],_o:rr.length>1?1:0},geometry:g});
+   if(++i%1000===0)postMessage({t:'p',v:48+Math.min(42,i/250),msg:kind+'を軽量化中…'});
+  }
+  postMessage({t:'done',fc:{type:'FeatureCollection',features:out},count:seen.size,kind});
+ }catch(err){postMessage({t:'err',msg:String(err)})}
+}`;
+function worker(url,kind){return new Promise((res,rej)=>{const u=URL.createObjectURL(new Blob([workerCode],{type:'text/javascript'})),w=new Worker(u);w.onmessage=e=>{const d=e.data;if(d.t==='p')status(d.msg,d.v);else if(d.t==='done'){w.terminate();URL.revokeObjectURL(u);res(d)}else if(d.t==='err'){w.terminate();URL.revokeObjectURL(u);rej(Error(d.msg))}};w.postMessage({url,kind})})}
+function style(){return{version:8,sources:{gsi:{type:'raster',tiles:['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],tileSize:256,attribution:'国土地理院'}},layers:[{id:'gsi',type:'raster',source:'gsi',paint:{'raster-saturation':-.8,'raster-opacity':.56}}],glyphs:'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'}}
+function addRoads(fc){all=fc;map.addSource('r',{type:'geojson',data:fc});map.addLayer({id:'case',type:'line',source:'r',paint:{'line-color':'#fff','line-width':['interpolate',['linear'],['zoom'],4,2,6,3.2,9,5]}});map.addLayer({id:'roads',type:'line',source:'r',paint:{'line-color':['get','_c'],'line-width':['interpolate',['linear'],['zoom'],4,.75,6,1.35,9,2.6],'line-opacity':.94}});map.addLayer({id:'ov',type:'line',source:'r',minzoom:6,filter:['==',['get','_o'],1],paint:{'line-color':'#222','line-width':.8,'line-dasharray':[2,2],'line-opacity':.65}});map.addLayer({id:'nums',type:'symbol',source:'r',minzoom:6,layout:{'symbol-placement':'line','symbol-spacing':520,'text-field':['get','_l'],'text-font':['Open Sans Regular'],'text-size':10,'visibility':'none'},paint:{'text-color':'#fff','text-halo-color':['get','_c'],'text-halo-width':4}});map.addSource('sel',{type:'geojson',data:{type:'FeatureCollection',features:[]}});map.addLayer({id:'selc',type:'line',source:'sel',paint:{'line-color':'#fff','line-width':['interpolate',['linear'],['zoom'],4,5,8,8,12,11]}});map.addLayer({id:'sel',type:'line',source:'sel',paint:{'line-color':'#ff6a2c','line-width':['interpolate',['linear'],['zoom'],4,2.8,8,5,12,7.5]}});map.on('click','roads',e=>{const s=e.features?.[0]?.properties?._s||'',n=(s.match(/\d+/)||[])[0];if(n)select(n)})}
+function select(v){const n=String(+v);if(!OK.has(n))return alert('その番号は現在の一般国道にはありません。');closeSheets();selected=n;$('routeInput').value=n;$('badge').textContent=n;$('rname').textContent='国道'+n+'号';$('card').classList.add('open');const k='|'+n+'|',fs=all.features.filter(f=>(f.properties._s||'').includes(k));map.getSource('sel').setData({type:'FeatureCollection',features:fs});if(fs.length){const b=new maplibregl.LngLatBounds(),walk=c=>typeof c[0]==='number'?b.extend(c):c.forEach(walk);fs.forEach(f=>walk(f.geometry.coordinates));map.fitBounds(b,{padding:{top:60,bottom:120,left:25,right:25},maxZoom:8.8,duration:500})}}
+function clearSel(){selected=null;$('card').classList.remove('open');if(map.getSource('sel'))map.getSource('sel').setData({type:'FeatureCollection',features:[]})}
+function kansai(){clearSel();map.fitBounds([[134.0,33.3],[137.6,36.1]],{padding:{top:56,bottom:50,left:10,right:10},duration:500})}
+async function loadMotor(){if(motorLoaded)return;try{const d=await worker(MOTOR,'高速系区間');map.addSource('m',{type:'geojson',data:d.fc});map.addLayer({id:'motor',type:'line',source:'m',paint:{'line-color':'#00a1aa','line-width':['interpolate',['linear'],['zoom'],5,1.6,9,3.2,13,5.4]}});motorLoaded=true;status('高速系区間を表示しました',100,true)}catch(e){status('高速系区間の取得に失敗しました',100,false);express=false;$('expressSwitch').classList.remove('on')}}
+function openSheet(id){$('back').classList.add('open');$(id).classList.add('open')}function closeSheets(){$('back').classList.remove('open');document.querySelectorAll('.sheet').forEach(x=>x.classList.remove('open'))}
+function build(){const f=document.createDocumentFragment();ROUTES.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>select(String(n));f.appendChild(b)});$('grid').appendChild(f)}
+map=new maplibregl.Map({container:'map',style:style(),center:[135.4,34.8],zoom:6,minZoom:3.2,maxZoom:16,dragRotate:false,pitchWithRotate:false});
+map.on('load',async()=>{try{const d=await worker(DATA,'一般国道');status('地図へ描画中…',94);addRoads(d.fc);kansai();status('一般国道を表示しました',100,true)}catch(e){console.error(e);status('読み込みに失敗しました。再読み込みしてください。',100,false)}});
+build();$('searchFab').onclick=()=>openSheet('searchSheet');$('menuFab').onclick=()=>openSheet('menuSheet');$('homeFab').onclick=kansai;$('goBtn').onclick=()=>select($('routeInput').value);$('routeInput').onkeydown=e=>{if(e.key==='Enter')select(e.target.value)};$('clearBtn').onclick=clearSel;$('back').onclick=closeSheets;document.querySelectorAll('.close').forEach(b=>b.onclick=closeSheets);$('labelFab').onclick=()=>{labels=!labels;$('labelFab').classList.toggle('on',labels);$('labelSwitch').classList.toggle('on',labels);if(map.getLayer('nums'))map.setLayoutProperty('nums','visibility',labels?'visible':'none')};$('labelSwitch').onclick=()=>$('labelFab').click();$('expressSwitch').onclick=async()=>{express=!express;$('expressSwitch').classList.toggle('on',express);if(express){await loadMotor();if(map.getLayer('motor'))map.setLayoutProperty('motor','visibility','visible')}else if(map.getLayer('motor'))map.setLayoutProperty('motor','visibility','none')};
+})();
+</script>
+</body>
+</html>
